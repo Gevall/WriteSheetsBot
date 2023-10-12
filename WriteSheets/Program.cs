@@ -64,8 +64,11 @@ namespace WriteSheets
 
         private static async Task WriteStringToGoogleSheets(string message)
         {
-            Items item = MessageParser(message);
-            PutData(item);
+            lock(valuesResource)
+            {
+                Items item = MessageParser(message);
+                PutData(item);
+            }
         }
 
         private static Items MessageParser(string message)
@@ -110,8 +113,6 @@ namespace WriteSheets
             {
                 Console.WriteLine(ex.Message);
             }
-
-
 
             return line;
         }
