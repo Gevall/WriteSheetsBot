@@ -8,13 +8,13 @@ namespace WriteSheets
 {
     internal class Items
     {
-        public string Date { get; set; }
-        public string Address { get; set; }
-        public string Cabinet { get; set; }
-        public string NumberOfPC { get; set; }
-        public string Status { get; set; }
-        public string Caption { get; set; }
-        public string NameOfComplete { get; set; }
+        public string Date { get; set; }    // Дата выполнения работ
+        public string Address { get; set; } // Министерство в котором выполнялись работы
+        public string Cabinet { get; set; } // Местоположение АРМ в министерстве
+        public string NumberOfPC { get; set; } // номер АРМ
+        public string Status { get; set; } // Статус готовности АРМ
+        public string Caption { get; set; } // Описание (если есть)
+        public string NameOfComplete { get; set; } // Имя выполнившего
 
     }
 }

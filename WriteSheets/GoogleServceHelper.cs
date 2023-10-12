@@ -11,15 +11,21 @@ namespace WriteSheets
 {
     internal class GoogleServceHelper
     {
-        public SheetsService Service { get; set; }
-        const string APP_NAME = "TestTable";
+        public SheetsService Service { get; set; } // Инициализация класса для работы с таблицой
+        const string APP_NAME = "TestTable";   // имя таблицы
         static readonly string[] Scopes = { SheetsService.Scope.Spreadsheets };
 
+        /// <summary>
+        /// Инициализация при создании
+        /// </summary>
         public GoogleServceHelper() 
         {
             InitializeService();
         }
 
+        /// <summary>
+        /// Инициализация подключения к API Google
+        /// </summary>
         private void InitializeService()
         {
             var credential = GetCredentialsFromFile();
@@ -30,6 +36,10 @@ namespace WriteSheets
             });
         }
 
+        /// <summary>
+        /// Чтение json токена авторизации в API Google
+        /// </summary>
+        /// <returns></returns>
         private GoogleCredential GetCredentialsFromFile()
         {
             GoogleCredential credential;

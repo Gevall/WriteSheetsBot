@@ -8,6 +8,11 @@ namespace WriteSheets
 {
     internal class ItemsMapper
     {
+        /// <summary>
+        /// Преобразование таблицы в List<Items>
+        /// </summary>
+        /// <param name="values"></param>
+        /// <returns></returns>
         public static List<Items> MapFromRangeData(IList<IList<object>> values)
         {
             var items = new List<Items>();
@@ -27,6 +32,12 @@ namespace WriteSheets
             }
             return items;
         }
+
+        /// <summary>
+        /// конвертирование строки с новыми данными в табличную строку
+        /// </summary>
+        /// <param name="item"></param>
+        /// <returns></returns>
         public static IList<IList<object>> MapToRangeData(Items item)
         {
             var objectList = new List<object>() { item.Date, item.Address, item.Cabinet, item.NumberOfPC, item.Status, item.Caption, item.NameOfComplete };
