@@ -46,13 +46,26 @@ namespace WriteSheets
             if (update.Type == Telegram.Bot.Types.Enums.UpdateType.Message)
             {
                 var message = update.Message;
-                if (message.Text.ToLower() == "/help")
+                if (message.Sticker != null)
                 {
-                    await botClient.SendTextMessageAsync(message.Chat, "Строка для добавления в таблицу должна иметь следующий вид:" +
-                        "\nДата, Министерство, Местоположение АРМ, Номер АРМ, Статус АРМ, ФИО исполнителя/исполнителей, Описание");
+                    await botClient.SendTextMessageAsync(message.Chat, "Не слать стикеры!! Метод не реализован!");
                     return;
                 }
-                await WriteStringToGoogleSheets(message.Text);
+                if(message.Text.ToLower() is String)
+                {
+                    if (message.Text.ToLower() == "/help")
+                    {
+                        await botClient.SendTextMessageAsync(message.Chat, "Строка для добавления в таблицу должна иметь следующий вид:" +
+                            "\nДата, Министерство, Местоположение АРМ, Номер АРМ, Статус АРМ, ФИО исполнителя/исполнителей, Описание");
+                        return;
+                    }
+                    if (message.Text.ToLower() != null)
+                    {
+                        await WriteStringToGoogleSheets(message.Text);
+                        return;
+                    }
+                }
+                await botClient.SendTextMessageAsync(message.Chat, "Только текст!!111 Остальное не реализовано!");
             }
         }
 
@@ -66,8 +79,12 @@ namespace WriteSheets
         {
             lock(valuesResource)
             {
-                Items item = MessageParser(message);
-                PutData(item);
+                Items? item = MessageParser(message);
+                if (item != null)
+                {
+                    PutData(item);
+                }
+                else Console.WriteLine("Хуйню какую то прислали");
             }
         }
 
@@ -87,27 +104,32 @@ namespace WriteSheets
                 count++;
             }
 
+
             try
             {
-                if (items.Length == 7)
+                if (items.Length > 5)
                 {
-                    line.Date = items[0];
-                    line.Address = items[1];
-                    line.Cabinet = items[2];
-                    line.NumberOfPC = items[3];
-                    line.Status = items[4];
-                    line.NameOfComplete = items[5];
-                    line.Caption = items[6];
+                    if (items.Length == 7)
+                    {
+                        line.Date = items[0];
+                        line.Address = items[1];
+                        line.Cabinet = items[2];
+                        line.NumberOfPC = items[3];
+                        line.Status = items[4];
+                        line.NameOfComplete = items[5];
+                        line.Caption = items[6];
+                    }
+                    else
+                    {
+                        line.Date = items[0];
+                        line.Address = items[1];
+                        line.Cabinet = items[2];
+                        line.NumberOfPC = items[3];
+                        line.Status = items[4];
+                        line.NameOfComplete = items[5];
+                    }
                 }
-                else
-                {
-                    line.Date = items[0];
-                    line.Address = items[1];
-                    line.Cabinet = items[2];
-                    line.NumberOfPC = items[3];
-                    line.Status = items[4];
-                    line.NameOfComplete = items[5];
-                }
+                else return null;
             }
             catch (Exception ex)
             {
