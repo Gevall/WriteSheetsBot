@@ -9,6 +9,9 @@
 
   <ItemGroup>
     <PackageReference Include="Google.Apis.Sheets.v4" Version="1.62.0.3148" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="Telegram.Bot" Version="19.0.0" />
+    <PackageReference Include="Telegram.Bots.Extensions.Polling" Version="5.9.0" />
   </ItemGroup>
 
 </Project>

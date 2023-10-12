@@ -25,8 +25,8 @@ namespace WriteSheets
                     Cabinet = value[2].ToString(),
                     NumberOfPC = value[3].ToString(),
                     Status = value[4].ToString(),
-                    Caption = value[5].ToString(),
-                    NameOfComplete = value[6].ToString()
+                    NameOfComplete = value[5].ToString(),
+                    Caption = value[6].ToString()
                 };
                 items.Add(item);
             }
@@ -40,7 +40,7 @@ namespace WriteSheets
         /// <returns></returns>
         public static IList<IList<object>> MapToRangeData(Items item)
         {
-            var objectList = new List<object>() { item.Date, item.Address, item.Cabinet, item.NumberOfPC, item.Status, item.Caption, item.NameOfComplete };
+            var objectList = new List<object>() { item.Date, item.Address, item.Cabinet, item.NumberOfPC, item.Status, item.NameOfComplete, item.Caption };
             var rangeData = new List<IList<object>> { objectList };
             return rangeData;
         }
