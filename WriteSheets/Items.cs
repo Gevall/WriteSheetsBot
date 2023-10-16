@@ -10,7 +10,7 @@ namespace WriteSheets
     {
         public Items() { }
 
-        //public int CountOfLine { get; set; } // Порядковый номер
+        public string? CountOfLine { get; set; } // Порядковый номер
         public string? Address { get; set; }    // Адрес проведения работ
         public string? Ministry { get; set; } // Министерство в котором выполнялись работы
         public string? Cabinet { get; set; } // номер кабинета 

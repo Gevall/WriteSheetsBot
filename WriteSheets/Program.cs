@@ -14,13 +14,19 @@ namespace WriteSheets
         static GoogleServceHelper helper= new GoogleServceHelper();
         static SpreadsheetsResource.ValuesResource valuesResource = helper.Service.Spreadsheets.Values;
         static ITelegramBotClient bot = new TelegramBotClient("6426754474:AAEXBSxN3aeTXgn98_5MRD-G5-G-BdzNVlA");
+        //static List<Items> ItemsFromTable = GetData();
+
 
         static void Main(string[] args)
         {
-            //StartBot();
-            GetData();
+            
+            StartBot();
+            //GetData();
         }
 
+        /// <summary>
+        /// Метода запуска бота
+        /// </summary>
         private static void StartBot()
         {
             Console.WriteLine("Запущен бот " + bot.GetMeAsync().Result.FirstName);
@@ -92,66 +98,46 @@ namespace WriteSheets
         private static Items MessageParser(string message)
         {
             string[] items;
-            char[] separators = { ',' , ';', '\\' };
+            char[] separators = { ',', ';', '\\' };
 
             items = message.Split(separators);
 
             Items line = new Items();
-            int count = 0;
-            foreach (var e in items)
-            {
-               
-                Console.WriteLine($">>>>>> {count} " + e);
-                count++;
-            }
 
+            foreach(var e in items)
+            {
+                Console.WriteLine($">>>>>>>>> {e}");
+            }
 
             try
             {
-                if (items.Length > 5)
-                {
-                    if (items.Length == 7)
-                    {
-                        //line.Date = items[0];
-                        line.Address = items[1];
-                        line.Ministry = items[2];
-                        line.Cabinet = items[3];
-                        line.NameOfEmployee = items[4];
-                        line.NumberOfSSD = items[5];
-                        line.NumberOfPC = items[6];
-                        line.Status = items[7];
-                        line.StatusDescription = items[8];
-                        line.WorkDate = DateTime.MinValue.ToString();
-                        line.AvailabilityOfSecurity = items[10];
-                        line.NameOfComplete = items[11];
-                        line.WriteOfJournal = items[12] == "+" ? "ИСТИНА" : "ЛОЖЬ";  
-                        line.NeedToByAdapter = items[13] == "+" ? "ИСТИНА" : "ЛОЖЬ";
-                        line.Caption = items[14];
-                    }
-                    else
-                    {
-                        //line.Date = items[0];
-                        line.Address = items[1];
+                        line.CountOfLine = null; 
+                        line.Address = items[0];
+                        line.Ministry = items[1];
                         line.Cabinet = items[2];
-                        line.NumberOfPC = items[3];
-                        line.Status = items[4];
-                        line.NameOfComplete = items[5];
-                    }
-                }
-                else return null;
+                        line.NameOfEmployee = items[3];
+                        line.NumberOfSSD = items[4];
+                        line.NumberOfPC = items[5];
+                        line.Status = items[6];
+                        line.StatusDescription = items[7] ;
+                        line.WorkDate = DateTime.Today.ToString();
+                        line.AvailabilityOfSecurity = items[8] ;
+                        line.NameOfComplete = items[9];
+                        line.WriteOfJournal = items[10] == "+" ? "ИСТИНА" : "ЛОЖЬ";  
+                        line.NeedToByAdapter = items[11] == "+" ? "ИСТИНА" : "ЛОЖЬ";
+                        line.Caption = items[12];
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
             }
-
             return line;
         }
 
         /// <summary>
         /// Получение всех данных из таблицы
         /// </summary>
-        static void GetData()
+        static List<Items> GetData()
         {
             var range = $"{sheets_name}!A:O";
 
@@ -161,24 +147,31 @@ namespace WriteSheets
 
             var items = ItemsMapper.MapFromRangeData(values);
 
-            foreach (var e in items )
-            {
-                Console.WriteLine($" {e.Address, 15} |" +
-                    $" {e.Ministry,10} |" +
-                    $" {e.Cabinet, 10} |" +
-                    $" {e.NameOfEmployee, 10} |" +
-                    $" {e.NumberOfSSD, 10} |" +
-                    $" {e.NumberOfPC, 10} |" +
-                    $" {e.Status, 10} |" +
-                    $" {e.StatusDescription,10} |" +
-                    $" {e.WorkDate,10} |" +
-                    $" {e.AvailabilityOfSecurity,10} |" +
-                    $" {e.NameOfComplete,10} |" +
-                    $" {e.WriteOfJournal,10} |" +
-                    $" {e.NeedToByAdapter,10} |" +
-                    $" {e.Caption,10} |"
-                    );
-            }
+            WriteRandomString(items);
+            WriteRandomString(items);
+
+            return items;
+        }
+
+        static void WriteRandomString(List<Items> e)
+        {
+            Random random = new();
+            int count = random.Next(e.Count);
+            Console.WriteLine($" {e[count].Address,15} |" +
+                                $" {e[count].Ministry,10} |" +
+                                $" {e[count].Cabinet,10} |" +
+                                $" {e[count].NameOfEmployee,10} |" +
+                                $" {e[count].NumberOfSSD,10} |" +
+                                $" {e[count].NumberOfPC,10} |" +
+                                $" {e[count].Status,10} |" +
+                                $" {e[count].StatusDescription,10} |" +
+                                $" {e[count].WorkDate,10} |" +
+                                $" {e[count].AvailabilityOfSecurity,10} |" +
+                                $" {e[count].NameOfComplete,10} |" +
+                                $" {e[count].WriteOfJournal,10} |" +
+                                $" {e[count].NeedToByAdapter,10} |" +
+                                $" {e[count].Caption,10} |"
+                                );
         }
 
         /// <summary>

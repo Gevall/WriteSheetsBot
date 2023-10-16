@@ -18,6 +18,7 @@ namespace WriteSheets
             var items = new List<Items>();
             foreach (var value in values)
             {
+                #region
                 //Console.WriteLine(value[1]);
                 //Console.WriteLine(value[2]);
                 //Console.WriteLine(value[3]);
@@ -33,11 +34,12 @@ namespace WriteSheets
                 //Console.WriteLine(value[13]);
                 ////Console.WriteLine(value[14]);
                 //Console.WriteLine(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+                #endregion
                 try
                 {
                     Items item = new()
                     {
-                        //CountOfLine =  Int32.Parse(value[0].ToString()),
+                        CountOfLine =  value[0].ToString(),
                         Address = value[1] == null ? null : value[1].ToString(),
                         Ministry = value[2] == null ? null : value[2].ToString(),
                         Cabinet = value[3] == null ? null : value[3].ToString(),
@@ -51,7 +53,7 @@ namespace WriteSheets
                         NameOfComplete = value[11] == null ? null : value[11].ToString(),
                         WriteOfJournal = value[12] == null ? null : value[12].ToString(),
                         NeedToByAdapter = value[13] == null ? null : value[13].ToString(),
-                        //Caption = value[14] == null ? null : value[14].ToString(),
+                        Caption = value[14] == null ? null : value[14].ToString(),
                     };
                     items.Add(item);
                 }
