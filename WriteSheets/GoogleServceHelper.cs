@@ -12,7 +12,7 @@ namespace WriteSheets
     internal class GoogleServceHelper
     {
         public SheetsService Service { get; set; } // Инициализация класса для работы с таблицой
-        const string APP_NAME = "TestTable";   // имя таблицы
+        const string APP_NAME = "REDOS";   // имя таблицы
         static readonly string[] Scopes = { SheetsService.Scope.Spreadsheets };
 
         /// <summary>

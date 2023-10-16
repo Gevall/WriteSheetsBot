@@ -9,7 +9,7 @@ namespace WriteSheets
 {
     internal class Program
     {
-        const string sheets_id = "1GlQAIkh7oP6UtDfNSbRXDfQ6TtiHQEDzNtDYRSX9RQI";
+        const string sheets_id = "1C_xjO7wjLiaeemnDmHlVNld-QOPYW2uHdePjVT9jwVo";
         const string sheets_name = "Items";
         static GoogleServceHelper helper= new GoogleServceHelper();
         static SpreadsheetsResource.ValuesResource valuesResource = helper.Service.Spreadsheets.Values;
@@ -17,7 +17,8 @@ namespace WriteSheets
 
         static void Main(string[] args)
         {
-            StartBot();
+            //StartBot();
+            GetData();
         }
 
         private static void StartBot()
@@ -111,17 +112,25 @@ namespace WriteSheets
                 {
                     if (items.Length == 7)
                     {
-                        line.Date = items[0];
+                        //line.Date = items[0];
                         line.Address = items[1];
-                        line.Cabinet = items[2];
-                        line.NumberOfPC = items[3];
-                        line.Status = items[4];
-                        line.NameOfComplete = items[5];
-                        line.Caption = items[6];
+                        line.Ministry = items[2];
+                        line.Cabinet = items[3];
+                        line.NameOfEmployee = items[4];
+                        line.NumberOfSSD = items[5];
+                        line.NumberOfPC = items[6];
+                        line.Status = items[7];
+                        line.StatusDescription = items[8];
+                        line.WorkDate = DateTime.MinValue.ToString();
+                        line.AvailabilityOfSecurity = items[10];
+                        line.NameOfComplete = items[11];
+                        line.WriteOfJournal = items[12] == "+" ? "ИСТИНА" : "ЛОЖЬ";  
+                        line.NeedToByAdapter = items[13] == "+" ? "ИСТИНА" : "ЛОЖЬ";
+                        line.Caption = items[14];
                     }
                     else
                     {
-                        line.Date = items[0];
+                        //line.Date = items[0];
                         line.Address = items[1];
                         line.Cabinet = items[2];
                         line.NumberOfPC = items[3];
@@ -144,7 +153,7 @@ namespace WriteSheets
         /// </summary>
         static void GetData()
         {
-            var range = $"{sheets_name}!A:G";
+            var range = $"{sheets_name}!A:O";
 
             var request = valuesResource.Get(sheets_id, range);
             var response = request.Execute();
@@ -154,7 +163,21 @@ namespace WriteSheets
 
             foreach (var e in items )
             {
-                Console.WriteLine($"{e.Date, 10} | {e.Address, 15} | {e.Cabinet, 10} | {e.NumberOfPC, 10} | {e.Status, 10} | {e.Caption, 10} | {e.NameOfComplete, 10} ");
+                Console.WriteLine($" {e.Address, 15} |" +
+                    $" {e.Ministry,10} |" +
+                    $" {e.Cabinet, 10} |" +
+                    $" {e.NameOfEmployee, 10} |" +
+                    $" {e.NumberOfSSD, 10} |" +
+                    $" {e.NumberOfPC, 10} |" +
+                    $" {e.Status, 10} |" +
+                    $" {e.StatusDescription,10} |" +
+                    $" {e.WorkDate,10} |" +
+                    $" {e.AvailabilityOfSecurity,10} |" +
+                    $" {e.NameOfComplete,10} |" +
+                    $" {e.WriteOfJournal,10} |" +
+                    $" {e.NeedToByAdapter,10} |" +
+                    $" {e.Caption,10} |"
+                    );
             }
         }
 
@@ -174,7 +197,21 @@ namespace WriteSheets
             appendRequest.ValueInputOption = AppendRequest.ValueInputOptionEnum.USERENTERED;
             appendRequest.Execute();
 
-            Console.WriteLine($"Complete input string: | {item.Date} | {item.Address} | {item.Cabinet} | {item.NumberOfPC} | {item.Status} | {item.NameOfComplete} | {item.Caption} ");
+            Console.WriteLine($"Complete input string: {item.Address,15} |" +
+                                                    $" {item.Ministry,10} |" +
+                                                    $" {item.Cabinet,10} |" +
+                                                    $" {item.NameOfEmployee,10} |" +
+                                                    $" {item.NumberOfSSD,10} |" +
+                                                    $" {item.NumberOfPC,10} |" +
+                                                    $" {item.Status,10} |" +
+                                                    $" {item.StatusDescription,10} |" +
+                                                    $" {item.WorkDate,10} |" +
+                                                    $" {item.AvailabilityOfSecurity,10} |" +
+                                                    $" {item.NameOfComplete,10} |" +
+                                                    $" {item.WriteOfJournal,10} |" +
+                                                    $" {item.NeedToByAdapter,10} |" +
+                                                    $" {item.Caption,10} |"
+                                                    );
         }
     }
 }
