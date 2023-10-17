@@ -8,6 +8,7 @@ namespace WriteSheets
 {
     internal class ItemsMapper
     {
+        public static int countOfLine;
         /// <summary>
         /// Преобразование таблицы в List<Items>
         /// </summary>
@@ -16,6 +17,7 @@ namespace WriteSheets
         public static List<Items> MapFromRangeData(IList<IList<object>> values)
         {
             var items = new List<Items>();
+            countOfLine = 0;
             foreach (var value in values)
             {
                 #region
@@ -39,7 +41,7 @@ namespace WriteSheets
                 {
                     Items item = new()
                     {
-                        CountOfLine =  value[0].ToString(),
+                        Number = countOfLine.ToString(),
                         Address = value[1] == null ? null : value[1].ToString(),
                         Ministry = value[2] == null ? null : value[2].ToString(),
                         Cabinet = value[3] == null ? null : value[3].ToString(),
@@ -56,6 +58,7 @@ namespace WriteSheets
                         Caption = value[14] == null ? null : value[14].ToString(),
                     };
                     items.Add(item);
+                    countOfLine++;
                 }
                 catch (Exception ex)
                 {

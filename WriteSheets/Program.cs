@@ -20,8 +20,8 @@ namespace WriteSheets
         static void Main(string[] args)
         {
             
-            StartBot();
             //GetData();
+            StartBot();
         }
 
         /// <summary>
@@ -63,7 +63,22 @@ namespace WriteSheets
                     if (message.Text.ToLower() == "/help")
                     {
                         await botClient.SendTextMessageAsync(message.Chat, "Строка для добавления в таблицу должна иметь следующий вид:" +
-                            "\nДата, Министерство, Местоположение АРМ, Номер АРМ, Статус АРМ, ФИО исполнителя/исполнителей, Описание");
+                            "\n 1) Адрес," +
+                            "\n 2) Министерство," +
+                            "\n 3) Кабинет," +
+                            "\n 4) ФИО чей АРМ," +
+                            "\n 5) Номер SSD," +
+                            "\n 6) Номер АРМ," +
+                            "\n 7) Статус," +
+                            "\n 8) Причина если нельзя перевести на РедОС (\"-\" если всё ок)," +
+                            "\n 9) Наличи СЗИ/Аттестации," +
+                            "\n 10) ФИО Сотрудника," +
+                            "\n 11) Запись в журнале (+ или -)," +
+                            "\n 12) Необходимость докупить переходник (+ или -)," +
+                            "\n 13) Описание (если есть)" +
+                            "\n Все поля кроме \"Описания\" Обязательны! Если в поле нельзя ввести данные пишите: \"-\"" +
+                            "\n Символами разделителями между полями являются символы \n, - Запятая \n; - Точка с запятой \n\\ - Обратный слеш  " +
+                            "\n Если не разделите поля символами-разделителями то получите хуйню!");
                         return;
                     }
                     if (message.Text.ToLower() != null)
@@ -78,7 +93,7 @@ namespace WriteSheets
 
         public static async Task HandleErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)
         {
-            // Некоторые действия
+            
             Console.WriteLine(Newtonsoft.Json.JsonConvert.SerializeObject(exception));
         }
 
@@ -104,28 +119,28 @@ namespace WriteSheets
 
             Items line = new Items();
 
-            foreach(var e in items)
+            foreach (var e in items)
             {
-                Console.WriteLine($">>>>>>>>> {e}");
+                Console.WriteLine($">>>>>>>>> {e} >>>> {e.Length}");
             }
 
             try
             {
-                        line.CountOfLine = null; 
-                        line.Address = items[0];
-                        line.Ministry = items[1];
-                        line.Cabinet = items[2];
-                        line.NameOfEmployee = items[3];
-                        line.NumberOfSSD = items[4];
-                        line.NumberOfPC = items[5];
-                        line.Status = items[6];
-                        line.StatusDescription = items[7] ;
-                        line.WorkDate = DateTime.Today.ToString();
-                        line.AvailabilityOfSecurity = items[8] ;
-                        line.NameOfComplete = items[9];
-                        line.WriteOfJournal = items[10] == "+" ? "ИСТИНА" : "ЛОЖЬ";  
-                        line.NeedToByAdapter = items[11] == "+" ? "ИСТИНА" : "ЛОЖЬ";
-                        line.Caption = items[12];
+                        //line.Number = "123"; 
+                        line.Address = items[0].Trim() == "-" ? null : items[0].Trim();
+                        line.Ministry = items[1].Trim() == "-" ? null : items[1].Trim();
+                        line.Cabinet = items[2].Trim() == "-" ? null : items[2].Trim();
+                        line.NameOfEmployee = items[3].Trim() == "-" ? null : items[3].Trim();
+                        line.NumberOfSSD = items[4].Trim() == "-" ? null : items[4].Trim();
+                        line.NumberOfPC = items[5].Trim() == "-" ? null : items[5].Trim();
+                        line.Status = items[6].Trim();
+                        line.StatusDescription = items[7].Trim() == "-" ? null : items[7].Trim() ;
+                        line.WorkDate = DateTime.Today.ToShortDateString();
+                        line.AvailabilityOfSecurity = items[8] == "-" ? null : items[8].Trim();
+                        line.NameOfComplete = items[9].Trim() == "-" ? null : items[9].Trim();
+                        line.WriteOfJournal = items[10].Trim() == "+" ? "Да" : "Нет";  
+                        line.NeedToByAdapter = items[11].Trim() == "+" ? "Да" : "Нет";
+                        line.Caption = items[12].Trim();
             }
             catch (Exception ex)
             {
@@ -137,7 +152,7 @@ namespace WriteSheets
         /// <summary>
         /// Получение всех данных из таблицы
         /// </summary>
-        static List<Items> GetData()
+        static void GetData()
         {
             var range = $"{sheets_name}!A:O";
 
@@ -147,17 +162,17 @@ namespace WriteSheets
 
             var items = ItemsMapper.MapFromRangeData(values);
 
-            WriteRandomString(items);
-            WriteRandomString(items);
+            //WriteRandomString(items);
+            //WriteRandomString(items);
 
-            return items;
+            //return items;
         }
 
         static void WriteRandomString(List<Items> e)
         {
             Random random = new();
             int count = random.Next(e.Count);
-            Console.WriteLine($" {e[count].Address,15} |" +
+            Console.WriteLine($"   {e[count].Address,15} |" +
                                 $" {e[count].Ministry,10} |" +
                                 $" {e[count].Cabinet,10} |" +
                                 $" {e[count].NameOfEmployee,10} |" +
@@ -179,18 +194,20 @@ namespace WriteSheets
         /// </summary>
         static void PutData(Items item)
         {
-            var range = $"{sheets_name}!A:G";
+            var range = $"{sheets_name}!A:O";
 
             var valueRange = new ValueRange
             {
                 Values = ItemsMapper.MapToRangeData(item)
             };
 
-            var appendRequest = valuesResource.Append(valueRange, sheets_id, range);
-            appendRequest.ValueInputOption = AppendRequest.ValueInputOptionEnum.USERENTERED;
-            appendRequest.Execute();
 
-            Console.WriteLine($"Complete input string: {item.Address,15} |" +
+            var appendRequest = valuesResource.Append(valueRange, sheets_id, range);
+            appendRequest.ValueInputOption = AppendRequest.ValueInputOptionEnum.RAW;
+            appendRequest.Execute();
+            #region
+            Console.WriteLine($"Complete input string: " +
+                                                    $" {item.Address,15} |" +
                                                     $" {item.Ministry,10} |" +
                                                     $" {item.Cabinet,10} |" +
                                                     $" {item.NameOfEmployee,10} |" +
@@ -205,6 +222,8 @@ namespace WriteSheets
                                                     $" {item.NeedToByAdapter,10} |" +
                                                     $" {item.Caption,10} |"
                                                     );
+            #endregion
+
         }
     }
 }
