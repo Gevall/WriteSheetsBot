@@ -19,7 +19,7 @@ namespace WriteSheets
         static SpreadsheetsResource.ValuesResource valuesResource = helper.Service.Spreadsheets.Values;
         static ITelegramBotClient bot = new TelegramBotClient("6426754474:AAEXBSxN3aeTXgn98_5MRD-G5-G-BdzNVlA");
         static Dictionary<long, Employes> users = new();
-
+        static bool startProgram = false;
 
         static void Main(string[] args)
         {
@@ -31,27 +31,51 @@ namespace WriteSheets
         /// </summary>
         private static void StartBot()
         {
-            readFromFileWorkersList();
-            Console.WriteLine("Запущен бот " + bot.GetMeAsync().Result.FirstName);
-
-            var cts = new CancellationTokenSource();
-            var cancellationToken = cts.Token;
-            var receiverOptions = new ReceiverOptions
+            if (System.IO.File.Exists("users.json") || startProgram)
             {
-                AllowedUpdates = { }, // receive all update types
-            };
-            bot.StartReceiving(
-                HandleUpdateAsync,
-                HandleErrorAsync,
-                receiverOptions,
-                cancellationToken
-            );
-            Console.ReadLine();
+                readFromFileWorkersList();
+                Console.WriteLine("Запущен бот " + bot.GetMeAsync().Result.FirstName);
+
+                var cts = new CancellationTokenSource();
+                var cancellationToken = cts.Token;
+                var receiverOptions = new ReceiverOptions
+                {
+                    AllowedUpdates = { }, // receive all update types
+                };
+                bot.StartReceiving(
+                    HandleUpdateAsync,
+                    HandleErrorAsync,
+                    receiverOptions,
+                    cancellationToken
+                );
+                Console.ReadLine();
+            }
+            else
+            {
+                Console.WriteLine("Файл с базой пользователей остутствует. Все равно запустить программу? (yes/no)");
+                char input = Char.Parse(Console.ReadLine());
+                if(input == 'y' || input == 'д') 
+                {
+                    startProgram = true;
+                    StartBot();
+                }
+                else 
+                {
+                    Console.WriteLine("Программа закрыта. Проверьте файл и запустите повторно");
+                }
+            }
         }
 
+        /// <summary>
+        /// Логика бота
+        /// </summary>
+        /// <param name="botClient"></param>
+        /// <param name="update"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
         public static async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
         {
-            // Некоторые действия
+            // Логика бота
             Console.WriteLine(Newtonsoft.Json.JsonConvert.SerializeObject(update));
             if (update.Type == Telegram.Bot.Types.Enums.UpdateType.Message)
             {
