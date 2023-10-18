@@ -52,7 +52,7 @@ namespace WriteSheets
                         StatusDescription = value[8] == null ? null : value[8].ToString(),
                         WorkDate = value[9] == null ? null : value[9].ToString(),
                         AvailabilityOfSecurity = value[10] == null ? null : value[10].ToString(),
-                        NameOfComplete = value[11] == null ? null : value[11].ToString(),
+                        Worker = value[11] == null ? null : value[11].ToString(),
                         WriteOfJournal = value[12] == null ? null : value[12].ToString(),
                         NeedToByAdapter = value[13] == null ? null : value[13].ToString(),
                         Caption = value[14] == null ? null : value[14].ToString(),
@@ -86,7 +86,7 @@ namespace WriteSheets
                                                     item.StatusDescription,
                                                     item.WorkDate,
                                                     item.AvailabilityOfSecurity,
-                                                    item.NameOfComplete,
+                                                    item.Worker,
                                                     item.WriteOfJournal,
                                                     item.NeedToByAdapter,
                                                     item.Caption

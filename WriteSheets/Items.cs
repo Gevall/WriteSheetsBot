@@ -21,7 +21,7 @@ namespace WriteSheets
         public string? StatusDescription { get; set; } // Причина почему перевод невозможен
         public string? WorkDate { get; set; } // Дата выполнения работ
         public string? AvailabilityOfSecurity { get; set; } //Наличие СЗИ/Аттестации на АРМ
-        public string? NameOfComplete { get; set; } // Имя выполнившего
+        public string? Worker { get; set; } // Имя выполнившего
         public string? WriteOfJournal { get; set; } // Запись в журнале
         public string? NeedToByAdapter { get; set; } // Необходимость докупить переходник
         public string? Caption { get; set; } // Примечание (если есть)

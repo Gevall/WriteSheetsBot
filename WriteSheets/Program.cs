@@ -1,8 +1,12 @@
 ﻿using Google.Apis.Sheets.v4;
 using Google.Apis.Sheets.v4.Data;
+using Newtonsoft.Json;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Telegram.Bot;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
+using Telegram.Bot.Types.ReplyMarkups;
 using static Google.Apis.Sheets.v4.SpreadsheetsResource.ValuesResource;
 
 namespace WriteSheets
@@ -11,16 +15,14 @@ namespace WriteSheets
     {
         const string sheets_id = "1C_xjO7wjLiaeemnDmHlVNld-QOPYW2uHdePjVT9jwVo";
         const string sheets_name = "Items";
-        static GoogleServceHelper helper= new GoogleServceHelper();
+        static GoogleServceHelper helper = new GoogleServceHelper();
         static SpreadsheetsResource.ValuesResource valuesResource = helper.Service.Spreadsheets.Values;
         static ITelegramBotClient bot = new TelegramBotClient("6426754474:AAEXBSxN3aeTXgn98_5MRD-G5-G-BdzNVlA");
-        //static List<Items> ItemsFromTable = GetData();
+        static Dictionary<long, Employes> users = new();
 
 
         static void Main(string[] args)
         {
-            
-            //GetData();
             StartBot();
         }
 
@@ -29,6 +31,7 @@ namespace WriteSheets
         /// </summary>
         private static void StartBot()
         {
+            readFromFileWorkersList();
             Console.WriteLine("Запущен бот " + bot.GetMeAsync().Result.FirstName);
 
             var cts = new CancellationTokenSource();
@@ -58,32 +61,64 @@ namespace WriteSheets
                     await botClient.SendTextMessageAsync(message.Chat, "Не слать стикеры!! Метод не реализован!");
                     return;
                 }
-                if(message.Text.ToLower() is String)
+                if (update.Message.Text is String)
                 {
                     if (message.Text.ToLower() == "/help")
                     {
-                        await botClient.SendTextMessageAsync(message.Chat, "Строка для добавления в таблицу должна иметь следующий вид:" +
-                            "\n 1) Адрес," +
-                            "\n 2) Министерство," +
-                            "\n 3) Кабинет," +
-                            "\n 4) ФИО чей АРМ," +
-                            "\n 5) Номер SSD," +
-                            "\n 6) Номер АРМ," +
-                            "\n 7) Статус," +
-                            "\n 8) Причина если нельзя перевести на РедОС (\"-\" если всё ок)," +
-                            "\n 9) Наличи СЗИ/Аттестации," +
-                            "\n 10) ФИО Сотрудника," +
-                            "\n 11) Запись в журнале (+ или -)," +
-                            "\n 12) Необходимость докупить переходник (+ или -)," +
-                            "\n 13) Описание (если есть)" +
-                            "\n Все поля кроме \"Описания\" Обязательны! Если в поле нельзя ввести данные пишите: \"-\"" +
-                            "\n Символами разделителями между полями являются символы \n, - Запятая \n; - Точка с запятой \n\\ - Обратный слеш  " +
-                            "\n Если не разделите поля символами-разделителями то получите хуйню!");
+                        if (checkRegistation(update))
+                        {
+                            await botClient.SendTextMessageAsync(message.Chat, "Строка для добавления в таблицу должна иметь следующий вид:" +
+                                "\n 1) Адрес," +
+                                "\n 2) Министерство," +
+                                "\n 3) Кабинет," +
+                                "\n 4) ФИО чей АРМ," +
+                                "\n 5) Номер SSD," +
+                                "\n 6) Номер АРМ," +
+                                "\n 7) Статус," +
+                                "\n 8) Причина если нельзя перевести на РедОС (\"-\" если всё ок)," +
+                                "\n 9) Наличи СЗИ/Аттестации," +
+                                "\n 10) ФИО Сотрудника," +
+                                "\n 11) Запись в журнале (+ или -)," +
+                                "\n 12) Необходимость докупить переходник (+ или -)," +
+                                "\n 13) Описание (если есть)" +
+                                "\n Все поля кроме \"Описания\" Обязательны! Если в поле нельзя ввести данные пишите: \"-\"" +
+                                "\n Символами разделителями между полями являются символы \n, - Запятая \n; - Точка с запятой \n\\ - Обратный слеш  " +
+                                "\n Если не разделите поля символами-разделителями то получите хуйню!");
+                            return;
+                        }
+                        else
+                        {
+                            messateToRegister(update, botClient);
+                            return;
+                        }
+                    }
+                    if (message.Text.ToLower() == "/registation")
+                    {
+                        if (checkRegistation(update))
+                        {
+                            await botClient.SendTextMessageAsync(message.Chat, "Ты уже зарегистрирован! Иди работай!");
+                            return;
+                        }
+                        else
+                        {
+                            await botClient.SendTextMessageAsync(message.Chat, "Введите ваше ФИО полностью", replyMarkup: new ForceReplyMarkup { Selective = true });
+                            return;
+                        }
+                    }
+                    if (message.Text == "/plsDelMyReg")
+                    {
+                        await botClient.SendTextMessageAsync(message.Chat, deleteEmploye(update));
+                        return;
+                    }
+                    if (update.Message.ReplyToMessage != null && message.ReplyToMessage.Text.Contains("Введите ваше ФИО полностью"))
+                    {
+                        //users.Add(update.Message.Chat.Id, );
+                        await botClient.SendTextMessageAsync(message.Chat, registation(update, message.Text));
                         return;
                     }
                     if (message.Text.ToLower() != null)
                     {
-                        await WriteStringToGoogleSheets(message.Text);
+                        await writeStringToGoogleSheets(message.Text, update);
                         return;
                     }
                 }
@@ -93,24 +128,64 @@ namespace WriteSheets
 
         public static async Task HandleErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)
         {
-            
+
             Console.WriteLine(Newtonsoft.Json.JsonConvert.SerializeObject(exception));
         }
 
-        private static async Task WriteStringToGoogleSheets(string message)
+        /// <summary>
+        /// Метод записи строки в таблицу
+        /// </summary>
+        /// <param name="message"></param>
+        /// <returns></returns>
+        private static async Task writeStringToGoogleSheets(string message, Update update)
         {
-            lock(valuesResource)
+            lock (valuesResource)
             {
-                Items? item = MessageParser(message);
+                Items? item = messageParser(message, update);
                 if (item != null)
                 {
-                    PutData(item);
+                    putData(item);
                 }
                 else Console.WriteLine("Хуйню какую то прислали");
             }
         }
 
-        private static Items MessageParser(string message)
+        /// <summary>
+        /// Метод регистрации пользователя
+        /// </summary>
+        /// <param name="update"></param>
+        /// <param name="message"></param>
+        /// <returns></returns>
+        private static string registation(Update update, string message)
+        {
+            string[] data;
+            char[] separatots = { ' ' };
+            Employes newEmploye = new();
+
+            data = message.Split(separatots);
+
+            try
+            {
+                newEmploye.firstname = data[1];
+                newEmploye.lastname = data[0];
+                newEmploye.patronymic = data[2];
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+
+            users.Add(update.Message.Chat.Id, newEmploye);
+            writeToFileRegistredWorkers();
+            return "Вы успешно зарегистрированы! Можете отправлять данные";
+        }
+
+        /// <summary>
+        /// Парсер сообщений в табличный вид
+        /// </summary>
+        /// <param name="message"></param>
+        /// <returns></returns>
+        private static Items messageParser(string message, Update update)
         {
             string[] items;
             char[] separators = { ',', ';', '\\' };
@@ -119,28 +194,28 @@ namespace WriteSheets
 
             Items line = new Items();
 
-            foreach (var e in items)
-            {
-                Console.WriteLine($">>>>>>>>> {e} >>>> {e.Length}");
-            }
+            //foreach (var e in items)
+            //{
+            //    Console.WriteLine($">>>>>>>>> {e} >>>> {e.Length}");
+            //}
 
             try
             {
-                        //line.Number = "123"; 
-                        line.Address = items[0].Trim() == "-" ? null : items[0].Trim();
-                        line.Ministry = items[1].Trim() == "-" ? null : items[1].Trim();
-                        line.Cabinet = items[2].Trim() == "-" ? null : items[2].Trim();
-                        line.NameOfEmployee = items[3].Trim() == "-" ? null : items[3].Trim();
-                        line.NumberOfSSD = items[4].Trim() == "-" ? null : items[4].Trim();
-                        line.NumberOfPC = items[5].Trim() == "-" ? null : items[5].Trim();
-                        line.Status = items[6].Trim();
-                        line.StatusDescription = items[7].Trim() == "-" ? null : items[7].Trim() ;
-                        line.WorkDate = DateTime.Today.ToShortDateString();
-                        line.AvailabilityOfSecurity = items[8] == "-" ? null : items[8].Trim();
-                        line.NameOfComplete = items[9].Trim() == "-" ? null : items[9].Trim();
-                        line.WriteOfJournal = items[10].Trim() == "+" ? "Да" : "Нет";  
-                        line.NeedToByAdapter = items[11].Trim() == "+" ? "Да" : "Нет";
-                        line.Caption = items[12].Trim();
+                //line.Number = "123"; 
+                line.Address = items[0].Trim() == "-" ? null : items[0].Trim();
+                line.Ministry = items[1].Trim() == "-" ? null : items[1].Trim();
+                line.Cabinet = items[2].Trim() == "-" ? null : items[2].Trim();
+                line.NameOfEmployee = items[3].Trim() == "-" ? null : items[3].Trim();
+                line.NumberOfSSD = items[4].Trim() == "-" ? null : items[4].Trim();
+                line.NumberOfPC = items[5].Trim() == "-" ? null : items[5].Trim();
+                line.Status = items[6].Trim();
+                line.StatusDescription = items[7].Trim() == "-" ? null : items[7].Trim();
+                line.WorkDate = DateTime.Today.ToShortDateString();
+                line.AvailabilityOfSecurity = items[8] == "-" ? null : items[8].Trim();
+                line.Worker = insertWorkerData(update);
+                line.WriteOfJournal = items[9].Trim() == "+" ? "Да" : "Нет";
+                line.NeedToByAdapter = items[10].Trim() == "+" ? "Да" : "Нет";
+                line.Caption = items[11].Trim();
             }
             catch (Exception ex)
             {
@@ -152,7 +227,7 @@ namespace WriteSheets
         /// <summary>
         /// Получение всех данных из таблицы
         /// </summary>
-        static void GetData()
+        static void getData()
         {
             var range = $"{sheets_name}!A:O";
 
@@ -168,7 +243,72 @@ namespace WriteSheets
             //return items;
         }
 
-        static void WriteRandomString(List<Items> e)
+        /// <summary>
+        /// Метод удаления регистрации пользователя
+        /// </summary>
+        /// <param name="update"></param>
+        private static string deleteEmploye(Update update)
+        {
+            users.Remove(update.Message.Chat.Id);
+            writeToFileRegistredWorkers();
+            return "Ваша учетная запись удалена! Можете заного зарегистрироваться (если хотите) \"/registation\" ";
+        }
+
+        /// <summary>
+        /// Метод преобразования ФИО сотурдника в строку для добавляния в Google таблицу
+        /// </summary>
+        /// <param name="update"></param>
+        /// <returns></returns>
+        private static string insertWorkerData(Update update)
+        {
+            string userDate;
+            Employes worker = users[update.Message.Chat.Id];
+            userDate = $"{worker.lastname} {worker.firstname} {worker.patronymic}";
+            return userDate;
+        }
+
+        /// <summary>
+        /// Проверка регистрации пользователя
+        /// </summary>
+        /// <param name="update"></param>
+        /// <returns>Возвращает true - если пользователь зарегистрирвоан. Иначе - false</returns>
+        private static bool checkRegistation(Update update)
+        {
+            long id = update.Message.Chat.Id;
+            if (users.Keys.Contains(id)) return true;
+            else return false;
+        }
+
+        /// <summary>
+        /// Сообщение пользователю если он не зарегистирован
+        /// </summary>
+        /// <param name="update"></param>
+        /// <param name="botClient"></param>
+        private static async void messateToRegister(Update update, ITelegramBotClient botClient)
+        {
+            await botClient.SendTextMessageAsync(update.Message.Chat, "Вы не зарегистрированы! Для начала работы с ботом введите команду" +
+                "\"/registation\" и зарегистрируйтесь!");
+        }
+        
+        private static void writeToFileRegistredWorkers()
+        {
+            string json = JsonConvert.SerializeObject(users);
+            System.IO.File.WriteAllText("users.json", json, System.Text.Encoding.UTF8);
+        }
+
+        private static void readFromFileWorkersList()
+        {
+            try
+            {
+                string json = System.IO.File.ReadAllText("users.json");
+                users = JsonConvert.DeserializeObject<Dictionary<long, Employes>>(json);
+            }
+            catch(Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
+        }
+        static void _writeRandomString(List<Items> e)
         {
             Random random = new();
             int count = random.Next(e.Count);
@@ -182,7 +322,7 @@ namespace WriteSheets
                                 $" {e[count].StatusDescription,10} |" +
                                 $" {e[count].WorkDate,10} |" +
                                 $" {e[count].AvailabilityOfSecurity,10} |" +
-                                $" {e[count].NameOfComplete,10} |" +
+                                $" {e[count].Worker,10} |" +
                                 $" {e[count].WriteOfJournal,10} |" +
                                 $" {e[count].NeedToByAdapter,10} |" +
                                 $" {e[count].Caption,10} |"
@@ -192,7 +332,7 @@ namespace WriteSheets
         /// <summary>
         /// Вставка строки данных в таблицу
         /// </summary>
-        static void PutData(Items item)
+        static void putData(Items item)
         {
             var range = $"{sheets_name}!A:O";
 
@@ -217,7 +357,7 @@ namespace WriteSheets
                                                     $" {item.StatusDescription,10} |" +
                                                     $" {item.WorkDate,10} |" +
                                                     $" {item.AvailabilityOfSecurity,10} |" +
-                                                    $" {item.NameOfComplete,10} |" +
+                                                    $" {item.Worker,10} |" +
                                                     $" {item.WriteOfJournal,10} |" +
                                                     $" {item.NeedToByAdapter,10} |" +
                                                     $" {item.Caption,10} |"
