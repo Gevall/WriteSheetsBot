@@ -48,7 +48,8 @@ namespace WriteSheets
                     receiverOptions,
                     cancellationToken
                 );
-                Console.ReadLine();
+                managmentConsole();
+                //Console.ReadLine();
             }
             else
             {
@@ -170,6 +171,25 @@ namespace WriteSheets
                     putData(item);
                 }
                 else Console.WriteLine("Хуйню какую то прислали");
+            }
+        }
+
+        private static void managmentConsole()
+        {
+            bool checker = true;
+            while(checker)
+            {
+                if (Console.ReadLine().ToLower() == "write reg")
+                {
+                    foreach (var e in users)
+                    {
+                        Console.WriteLine($"id: {e.Key}, ФИО: {e.Value.lastname} {e.Value.firstname} {e.Value.patronymic}");
+                    }
+                }
+                if (Console.ReadLine().ToLower() == "exit")
+                {
+                    checker = false;
+                }
             }
         }
 
@@ -313,12 +333,21 @@ namespace WriteSheets
                 "\"/registation\" и зарегистрируйтесь!");
         }
         
+        /// <summary>
+        /// Серялизация зарегистрированных сторудников
+        /// </summary>
         private static void writeToFileRegistredWorkers()
         {
             string json = JsonConvert.SerializeObject(users);
-            System.IO.File.WriteAllText("users.json", json, System.Text.Encoding.UTF8);
+            lock (users)
+            {
+                System.IO.File.WriteAllText("users.json", json, System.Text.Encoding.UTF8);
+            }
         }
 
+        /// <summary>
+        /// Десярилизация из json
+        /// </summary>
         private static void readFromFileWorkersList()
         {
             try
