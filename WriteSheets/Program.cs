@@ -1,5 +1,6 @@
 ﻿using Google.Apis.Sheets.v4;
 using Google.Apis.Sheets.v4.Data;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
@@ -116,7 +117,7 @@ namespace WriteSheets
                             return;
                         }
                     }
-                    if (message.Text.ToLower() == "/registation")
+                    if (message.Text.ToLower() == "/registration")
                     {
                         if (checkRegistation(update))
                         {
@@ -142,7 +143,7 @@ namespace WriteSheets
                     }
                     if (message.Text.ToLower() != null)
                     {
-                        await writeStringToGoogleSheets(message.Text, update);
+                        await writeStringToGoogleSheets(message.Text, update, botClient);
                         return;
                     }
                 }
@@ -161,25 +162,45 @@ namespace WriteSheets
         /// </summary>
         /// <param name="message"></param>
         /// <returns></returns>
-        private static async Task writeStringToGoogleSheets(string message, Update update)
+        private static async Task writeStringToGoogleSheets(string message, Update update, ITelegramBotClient botclient)
         {
+            bool chekerAddLine;
             lock (valuesResource)
             {
                 Items? item = messageParser(message, update);
                 if (item != null)
                 {
                     putData(item);
+                    chekerAddLine = true;
                 }
-                else Console.WriteLine("Хуйню какую то прислали");
+                else
+                {
+                    Console.WriteLine("Хуйню какую то прислали");
+                    chekerAddLine= false;
+                }
+            }
+
+            if (chekerAddLine)
+            {
+                await botclient.SendTextMessageAsync(update.Message.Chat.Id, "Строка успешно добавлена");
+
+            }
+            else
+            {
+                await botclient.SendTextMessageAsync(update.Message.Chat.Id, "Неверный формат отправляемых данных!" +
+                                                                             "\nПроверь отправляемую строку или воспользуйся помощью - /help");
             }
         }
 
+        /// <summary>
+        /// Консоль управления для вывода информации по боту
+        /// </summary>
         private static void managmentConsole()
         {
             bool checker = true;
             while(checker)
             {
-                if (Console.ReadLine().ToLower() == "write reg")
+                if (Console.ReadLine().ToLower() == "show reg")
                 {
                     foreach (var e in users)
                     {
@@ -237,28 +258,29 @@ namespace WriteSheets
 
             Items line = new Items();
 
-            //foreach (var e in items)
-            //{
-            //    Console.WriteLine($">>>>>>>>> {e} >>>> {e.Length}");
-            //}
-
             try
             {
-                //line.Number = "123"; 
-                line.Address = items[0].Trim() == "-" ? null : items[0].Trim();
-                line.Ministry = items[1].Trim() == "-" ? null : items[1].Trim();
-                line.Cabinet = items[2].Trim() == "-" ? null : items[2].Trim();
-                line.NameOfEmployee = items[3].Trim() == "-" ? null : items[3].Trim();
-                line.NumberOfSSD = items[4].Trim() == "-" ? null : items[4].Trim();
-                line.NumberOfPC = items[5].Trim() == "-" ? null : items[5].Trim();
-                line.Status = items[6].Trim();
-                line.StatusDescription = items[7].Trim() == "-" ? null : items[7].Trim();
-                line.WorkDate = DateTime.Today.ToShortDateString();
-                line.AvailabilityOfSecurity = items[8] == "-" ? null : items[8].Trim();
-                line.Worker = insertWorkerData(update);
-                line.WriteOfJournal = items[9].Trim() == "+" ? "Да" : "Нет";
-                line.NeedToByAdapter = items[10].Trim() == "+" ? "Да" : "Нет";
-                line.Caption = items[11].Trim();
+                if (items.Length >= 10) 
+                {
+                    line.Address = items[0].Trim() == "-" ? null : items[0].Trim();
+                    line.Ministry = items[1].Trim() == "-" ? null : items[1].Trim();
+                    line.Cabinet = items[2].Trim() == "-" ? null : items[2].Trim();
+                    line.NameOfEmployee = items[3].Trim() == "-" ? null : items[3].Trim();
+                    line.NumberOfSSD = items[4].Trim() == "-" ? null : items[4].Trim();
+                    line.NumberOfPC = items[5].Trim() == "-" ? null : items[5].Trim();
+                    line.Status = items[6].Trim();
+                    line.StatusDescription = items[7].Trim() == "-" ? null : items[7].Trim();
+                    line.WorkDate = DateTime.Today.ToShortDateString();
+                    line.AvailabilityOfSecurity = items[8].Trim() == "-" ? null : items[8].Trim();
+                    line.Worker = insertWorkerData(update);
+                    line.WriteOfJournal = items[9].Trim() == "+" ? "Да" : "Нет";
+                    line.NeedToByAdapter = items[10].Trim() == "+" ? "Да" : "Нет";
+                    line.Caption = items[11].Trim();
+                }
+                else
+                {
+                    return null;
+                }
             }
             catch (Exception ex)
             {
