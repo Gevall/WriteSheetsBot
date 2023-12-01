@@ -3,12 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using WriteSheets.Model;
 
-namespace WriteSheets
+namespace WriteSheets.Google
 {
     internal class ItemsMapper
     {
         public static int countOfLine;
+
         /// <summary>
         /// Преобразование таблицы в List<Items>
         /// </summary>
@@ -20,23 +22,6 @@ namespace WriteSheets
             countOfLine = 0;
             foreach (var value in values)
             {
-                #region
-                //Console.WriteLine(value[1]);
-                //Console.WriteLine(value[2]);
-                //Console.WriteLine(value[3]);
-                //Console.WriteLine(value[4]);
-                //Console.WriteLine(value[5]);
-                //Console.WriteLine(value[6]);
-                //Console.WriteLine(value[7]);
-                //Console.WriteLine(value[8]);
-                //Console.WriteLine(value[9]);
-                //Console.WriteLine(value[10]);
-                //Console.WriteLine(value[11]);
-                //Console.WriteLine(value[12]);
-                //Console.WriteLine(value[13]);
-                ////Console.WriteLine(value[14]);
-                //Console.WriteLine(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
-                #endregion
                 try
                 {
                     Items item = new()
@@ -75,12 +60,12 @@ namespace WriteSheets
         /// <returns></returns>
         public static IList<IList<object>> MapToRangeData(Items item)
         {
-            var objectList = new List<object>() { 
-                                                    item.Address, 
-                                                    item.Ministry, 
-                                                    item.Cabinet, 
-                                                    item.NameOfEmployee, 
-                                                    item.NumberOfSSD, 
+            var objectList = new List<object>() {
+                                                    item.Address,
+                                                    item.Ministry,
+                                                    item.Cabinet,
+                                                    item.NameOfEmployee,
+                                                    item.NumberOfSSD,
                                                     item.NumberOfPC,
                                                     item.Status,
                                                     item.StatusDescription,

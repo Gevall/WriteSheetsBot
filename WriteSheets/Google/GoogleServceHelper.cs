@@ -7,18 +7,18 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace WriteSheets
+namespace WriteSheets.Google
 {
     internal class GoogleServceHelper
     {
         public SheetsService Service { get; set; } // Инициализация класса для работы с таблицой
-        const string APP_NAME = "REDOS";   // имя таблицы
+        const string APP_NAME = "Item1";   // Имя таблицы (сменить на нужную страницу в таблице Google)
         static readonly string[] Scopes = { SheetsService.Scope.Spreadsheets };
 
         /// <summary>
         /// Инициализация при создании
         /// </summary>
-        public GoogleServceHelper() 
+        public GoogleServceHelper()
         {
             InitializeService();
         }

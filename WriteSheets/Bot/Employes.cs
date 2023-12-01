@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace WriteSheets
+namespace WriteSheets.Bot
 {
     internal class Employes
     {
